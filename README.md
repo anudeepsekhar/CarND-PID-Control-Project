@@ -37,62 +37,20 @@ There's an experimental patch for windows in this [PR](https://github.com/udacit
 
 Tips for setting up your environment can be found [here](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/23d376c7-0195-4276-bdf0-e02f1f3c665d)
 
-## Editor Settings
 
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
+## Project Rubric
 
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
+### Implementation
+In this project I have implemented a cascaded PID controller to control the steering and the throttle of the vehicle. The first PID is designed to calculate the steering value to minimize the CTE (cross-track error). The second PID controller controls the speed of the car in porportion to the steering value.
+The PID implementation is done on the ./src/PID.cpp. The PID::UpdateError method calculates proportional, integral and derivative errors and the PID::TotalError calculates the total error using the appropriate coefficients.
 
-## Code Style
+## Reflections
+- The "P" for proportional means that the car will steer in proportion to the cross-track error, or CTE. CTE is essentially how far from the middle line of the road the car is. If the proportional gain is set too low the controller will be unresponsive to the error and if set too high the controller will overshoot the desired value and the controller tends to over correct itself. this constant cycle of over-shoots and over corrections result in oscillations.
 
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
+- The "I" for integral sums up all CTEs up to that point, such that too many negative CTEs (in this case, meaning the car has been to the left of the middle of the lane for awhile) will drive up this value, causing the car to turn back toward the middle, preventing the car from driving on one side of the lane the whole time. If the coefficient is too high for I, the car tends to have quicker oscillations, and does not tend to get up to a quick speed. A low coefficent for I will cause the car to tend to drift to one side of the lane or the other for longer periods of time.
 
-## Project Instructions and Rubric
+- The differential portion helps to counteract the proportional trend to overshoot the center line by smoothing the approach to it.
+This means that 1) if the derivative is quickly changing, the car will correct itself (i.e. higher steering angle) faster, such as in the case of a curve, and 2) if the car is moving outward from the middle, this will cause the steering to get larger (as the derivative sign will match the proportional sign), but if the car is moving toward the center (meaning the derivative value will be negative), the car's steering angle will get smoothed out, leading to a more smoother driving experience. 
 
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
-
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/e8235395-22dd-4b87-88e0-d108c5e5bbf4/concepts/6a4d8d42-6a04-4aa6-b284-1697c0fd6562)
-for instructions and the project rubric.
-
-## Hints!
-
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
-
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
-
+### Finding the right gains
+Although it is removed from the final code, I had used Twiddle a little bit to try out different parameters, but found the values found in the original project lessons to be sufficient under my current implementation. I tried dynamically tuning the PID gains using Twiddle algorithm but later found out it was not performing well, as the vehicle sometimes behaved erratically. So I decided to go with the traditional manual tuning method to tune my PID gains. The gains for both the controller (steering + speed) were tuned such the the vehicle performed well on both larger turns aswell as sharp turns. The final parameters for the steering controller and the speed controller where [P: 0.15, I: 0.0, D: 2.5] and [P: 0.8, I: 0.0, D: 2.5] respectively.
