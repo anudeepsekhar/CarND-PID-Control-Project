@@ -1,5 +1,5 @@
 #include "PID.h"
-
+#include <algorithm>
 using namespace std;
 
 /*
@@ -37,6 +37,7 @@ void PID::UpdateError(double cte) {
 
   prev_cte = cte;
   errorSum += cte;
+  iter++;
 
   if(cte > maxError){
     maxError = cte;
@@ -47,12 +48,12 @@ void PID::UpdateError(double cte) {
 }
 
 double PID::TotalError() {
-  t_error += (Kp*p_error + Ki*i_error + Kd*d_error);
-  return t_error
+  t_error = (Kp*p_error + Ki*i_error + Kd*d_error);
+  return t_error;
 }
 
 double PID::AverageError() {
-  return errorSum/counter;
+  return errorSum/iter;
 }
 
 double PID::MinError() {

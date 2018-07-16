@@ -22,6 +22,7 @@ public:
   double errorSum;
   double minError;
   double maxError;
+  double t_error;
 
   /*
   * Constructor
